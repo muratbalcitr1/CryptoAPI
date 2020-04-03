@@ -6,8 +6,8 @@ import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.resource.SimpleResource;
-import com.larvalabs.svgandroid.SVG;
-import com.larvalabs.svgandroid.SVGParseException;
+import com.caverock.androidsvg.SVG;
+import com.caverock.androidsvg.SVGParseException;
 
 import java.io.IOException;
 import java.io.InputStream;

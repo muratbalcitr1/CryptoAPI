@@ -15,8 +15,11 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestBuilder;
 import com.diren.cryptoapi.R;
 import com.diren.cryptoapi.data.Crypto;
+import com.diren.cryptoapi.svgParser.GlideApp;
+import com.diren.cryptoapi.svgParser.SvgSoftwareLayerSetter;
 import com.larvalabs.svgandroid.SVG;
 import com.larvalabs.svgandroid.SVGBuilder;
 import com.larvalabs.svgandroid.SVGParser;
@@ -26,11 +29,14 @@ import java.util.List;
 
 import pl.droidsonroids.gif.GifDrawable;
 
+import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
+
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.RowHolder> {
 
     private List<Crypto> cryptoList;
     OnItemClickListener clickListener;
     Context context;
+    private RequestBuilder<PictureDrawable> requestBuilder;
 
     public RecyclerViewAdapter(List<Crypto> cryptoList, Context context, OnItemClickListener clickListener) {
         this.cryptoList = cryptoList;
@@ -79,7 +85,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             imgIcon = itemView.findViewById(R.id.imgCrypto);
             txtCryptoName.setText(crypto.data.getCoins().get(position).getName());
             txtCrypto.setText(String.valueOf(crypto.getData().getCoins().get(position).getPrice()));
-             Glide.with(context).asGif().load(crypto.getData().getCoins().get(position).getIconUrl()).into(imgIcon);
+            requestBuilder =
+                    GlideApp.with(context)
+                            .as(PictureDrawable.class)
+                             .transition(withCrossFade())
+                            .listener(new SvgSoftwareLayerSetter());
+
+            Uri uri = Uri.parse(crypto.getData().getCoins().get(position).getIconUrl());
+            requestBuilder.load(uri).into(imgIcon);
 
             //txtCryptoName.setTextColor(Integer.parseInt(crypto.data.getCoins().get(position).getColor()));
             //txtCrypto.setTextColor(Color.parseColor(crypto.data.getCoins().get(position).getColor()));
