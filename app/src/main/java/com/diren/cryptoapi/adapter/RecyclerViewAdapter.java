@@ -19,6 +19,7 @@ import com.diren.cryptoapi.R;
 import com.diren.cryptoapi.data.Crypto;
 import com.larvalabs.svgandroid.SVG;
 import com.larvalabs.svgandroid.SVGBuilder;
+import com.larvalabs.svgandroid.SVGParser;
 
 import java.io.IOException;
 import java.util.List;
