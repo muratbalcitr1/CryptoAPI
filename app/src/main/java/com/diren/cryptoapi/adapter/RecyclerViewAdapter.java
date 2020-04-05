@@ -1,10 +1,9 @@
 package com.diren.cryptoapi.adapter;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
+import android.graphics.Color;
 import android.graphics.drawable.PictureDrawable;
 import android.net.Uri;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,32 +13,30 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
 import com.diren.cryptoapi.R;
 import com.diren.cryptoapi.data.Crypto;
 import com.diren.cryptoapi.svgParser.GlideApp;
 import com.diren.cryptoapi.svgParser.SvgSoftwareLayerSetter;
-import com.larvalabs.svgandroid.SVG;
-import com.larvalabs.svgandroid.SVGBuilder;
-import com.larvalabs.svgandroid.SVGParser;
 
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
-
-import pl.droidsonroids.gif.GifDrawable;
 
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.RowHolder> {
 
-    private List<Crypto> cryptoList;
+    ArrayList<Crypto> cryptoList;
     OnItemClickListener clickListener;
     Context context;
     private RequestBuilder<PictureDrawable> requestBuilder;
+    private static final int ITEM = 0;
+    private static final int LOADING = 1;
 
-    public RecyclerViewAdapter(List<Crypto> cryptoList, Context context, OnItemClickListener clickListener) {
-        this.cryptoList = cryptoList;
+    private boolean isLoadingAdded = false;
+
+    public RecyclerViewAdapter(Context context, OnItemClickListener clickListener) {
+        cryptoList = new ArrayList<>();
         this.clickListener = clickListener;
         this.context = context;
     }
@@ -57,7 +54,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             }
         });
         return new RowHolder(view);
-
     }
 
     @Override
@@ -67,7 +63,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     @Override
     public int getItemCount() {
-        return cryptoList.size();
+        return cryptoList == null ? 0 :cryptoList.size();
     }
 
     public class RowHolder extends RecyclerView.ViewHolder {
@@ -80,27 +76,90 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         }
 
         public void bind(Crypto crypto, int position) {
-            txtCryptoName = itemView.findViewById(R.id.txtCryptoName);
-            txtCrypto = itemView.findViewById(R.id.txtCrypto);
-            imgIcon = itemView.findViewById(R.id.imgCrypto);
-            txtCryptoName.setText(crypto.data.getCoins().get(position).getName());
-            txtCrypto.setText(String.valueOf(crypto.getData().getCoins().get(position).getPrice()));
-            requestBuilder =
-                    GlideApp.with(context)
-                            .as(PictureDrawable.class)
-                             .transition(withCrossFade())
-                            .listener(new SvgSoftwareLayerSetter());
+            try {
+                txtCryptoName = itemView.findViewById(R.id.txtCryptoName);
+                txtCrypto = itemView.findViewById(R.id.txtCrypto);
+                imgIcon = itemView.findViewById(R.id.imgCrypto);
+                txtCryptoName.setText(crypto.data.getCoins().get(position).getSymbol());
+                txtCrypto.setText(String.format("%.2f", crypto.getData().getCoins().get(position).getPrice()));
+                requestBuilder =
+                        GlideApp.with(context)
+                                .as(PictureDrawable.class)
+                                .transition(withCrossFade())
+                                .listener(new SvgSoftwareLayerSetter());
 
-            Uri uri = Uri.parse(crypto.getData().getCoins().get(position).getIconUrl());
-            requestBuilder.load(uri).into(imgIcon);
+                Uri uri = Uri.parse(crypto.getData().getCoins().get(position).getIconUrl());
+                requestBuilder.load(uri).into(imgIcon);
+                if (crypto.getData().getCoins().get(position).getColor() != null) {
+                    txtCryptoName.setTextColor(Color.parseColor(crypto.getData().getCoins().get(position).getColor().toUpperCase()));
+                    txtCrypto.setTextColor(Color.parseColor(crypto.getData().getCoins().get(position).getColor().toUpperCase()));
+                }
+            }catch (IllegalArgumentException e){
 
-            //txtCryptoName.setTextColor(Integer.parseInt(crypto.data.getCoins().get(position).getColor()));
-            //txtCrypto.setTextColor(Color.parseColor(crypto.data.getCoins().get(position).getColor()));
-
+            }
         }
     }
 
     public interface OnItemClickListener {
         void onItemClick(View view, int position);
     }
+
+
+    @Override
+    public int getItemViewType(int position) {
+        return (position == cryptoList.size() - 1 && isLoadingAdded) ? LOADING : ITEM;
+    }
+
+
+    public void addAll(List<Crypto> mcList) {
+        cryptoList.addAll(mcList);
+        notifyItemInserted(cryptoList.size() - 1);
+    }
+
+   /* public void remove(Crypto city) {
+        int position = cryptoList.indexOf(city);
+        if (position > -1) {
+            cryptoList.remove(position);
+            notifyItemRemoved(position);
+        }
+    }
+    public void add(Crypto mc) {
+        notifyDataSetChanged();
+        // notifyItemInserted(cryptoList.size() - 1);
+    }
+
+    public void clear() {
+        isLoadingAdded = false;
+        while (getItemCount() > 0) {
+            remove(getItem(0));
+        }
+    }
+
+    public boolean isEmpty() {
+        return getItemCount() == 0;
+    }
+*/
+
+    public void addLoadingFooter() {
+        isLoadingAdded = true;
+        //add(new CryptoAPI());
+    }
+
+    public void removeLoadingFooter() {
+        isLoadingAdded = false;
+
+        int position = cryptoList.size() - 1;
+        Crypto item = getItem(position);
+
+        if (item != null) {
+            cryptoList.remove(position);
+            notifyItemRemoved(position);
+        }
+    }
+
+    public Crypto getItem(int position) {
+        return cryptoList.get(position);
+    }
+
+
 }

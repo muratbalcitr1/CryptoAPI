@@ -12,6 +12,7 @@ import com.bumptech.glide.load.resource.SimpleResource;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.caverock.androidsvg.SVG;
 
+
 public class SvgDrawableTranscoder implements ResourceTranscoder<SVG, PictureDrawable> {
     @Nullable
     @Override

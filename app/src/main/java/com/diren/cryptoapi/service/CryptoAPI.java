@@ -12,6 +12,7 @@ public interface CryptoAPI {
     @GET("v1/public/coins")
     Call<Crypto> getData(
             @Query("limit") int limit,
-            @Query("order") String order
+            @Query("order") String order,
+            @Query("offset") int offset
     );
 }
